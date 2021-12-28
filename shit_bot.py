@@ -229,6 +229,7 @@ async def send(ctx, receiver: discord.User, amount: float):
         if receiver.empty:
             await ctx.send("<@{}> ผู้ใช้นี้ไม่มีในระบบ".format(receiver_id), delete_after=10)
             return
+        receiver = receiver.iloc[0]
         if member.balance < amount:
             await ctx.send("<@{}> คุณไม่มีเหรียญที่จะส่ง".format(dc_id), delete_after=10)
             return
