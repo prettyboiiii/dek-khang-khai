@@ -1,17 +1,19 @@
-import os
-from re import M
-import discord
-from discord import message, VoiceClient
+from datetime import datetime, timedelta
+from discord import FFmpegPCMAudio
+from discord.utils import get
 from discord.ext import commands
-import os.path
-from gtts import gTTS as gTTS
-from time import sleep
-import sqlite3 as sql
+from dotenv import load_dotenv
 from sqlite3 import Error
 from constants import *
-import random
-from datetime import datetime, timedelta
+import sqlite3 as sql
+from gtts import gTTS
 import pandas as pd
+import os.path
+import discord
+import random
+import os
+
+load_dotenv()
 
 client = commands.Bot(command_prefix='.')
 queue = []
@@ -30,52 +32,20 @@ def check_queue(voiceChannel, voiceClient, ctx):
         play(voiceChannel, voiceClient, ctx, queue.pop(0))
 
 @client.command(pass_context=True)
-async def p(ctx): #คำสั่งอ่านข้อความ input 
-    # print all the messages after the command
-    message = ctx.message.content.split(" ")
-    message.pop(0)
-    message = " ".join(message)
-    author: discord.Member = ctx.author
-    voiceChannel = discord.utils.get(ctx.guild.voice_channels,
-                                     name=str(author.voice.channel))
-    voiceClient: VoiceClient = discord.utils.get(client.voice_clients, guild=ctx.guild)
-    if (voiceClient == None):
-        await voiceChannel.connect()
-        voiceClient = discord.utils.get(client.voice_clients, guild=ctx.guild)
-    elif (voiceClient != None):
-        if not (voiceClient.is_connected()):
-            await voiceChannel.connect()
-            voiceClient = discord.utils.get(client.voice_clients,
-                                            guild=ctx.guild)
-    
-    await ctx.message.delete(delay=5)
-    if (voiceClient.is_playing()):
-        queue.append(message)
+async def p(ctx):
+    # grab the user who sent the command
+    channel = ctx.message.author.voice.channel
+    # only play music if user is in a voice channel
+    if not channel:
+        await ctx.send("You are not connected to a voice channel")
+        return
+    voice = get(client.voice_clients, guild=ctx.guild)
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
     else:
-        play(voiceChannel, voiceClient, ctx, message)
-
-# @client.command()
-# async def mos(ctx):
-#     author = ctx.author
-#     voiceChannel = discord.utils.get(ctx.guild.voice_channels,
-#                                      name=str(author.voice.channel))
-#     voiceClient = discord.utils.get(client.voice_clients, guild=ctx.guild)
-#     voiceFile = os.path.isfile('mos.mp3')
-#     if not voiceFile:
-#         tts = gTTS(text='มอสดีแต่เย็ด เล่นกระจอก าาาาาาาาาาาาาาาาาาาาาาาาาา',
-#                    lang='th',
-#                    slow=True)
-#         tts.save('mos.mp3')
-#     if (voiceClient == None):
-#         await voiceChannel.connect()
-#         voiceClient = discord.utils.get(client.voice_clients, guild=ctx.guild)
-#     elif (voiceClient != None):
-#         if not (voiceClient.is_connected()):
-#             await voiceChannel.connect()
-#             voiceClient = discord.utils.get(client.voice_clients,
-#                                             guild=ctx.guild)
-#     print(voiceClient.is_connected())
-#     await voiceClient.play(discord.FFmpegPCMAudio(source="mos.mp3"))
+        voice = await channel.connect()
+    source = FFmpegPCMAudio('test.mp3')
+    player = voice.play(source)
 
 @client.command()
 async def reboot(ctx):
