@@ -34,9 +34,9 @@ class MemberRepository:
         '''
         try:
             results = Member.select(id=id)
-            if results is None:
+            if len(list(results)) == 0:
                 return "Not found", None
-            return None, results
+            return None, list(results)[0]
         except Exception as e:
             rollback()
             return str(e), None

@@ -1,4 +1,6 @@
+from typing import Sized
 from src.providers.discord.FFmpegPCMAudio import FFmpegPCMAudio
+from src.providers.discord.queue import Queue
 from src.commands.general import General
 from io import BytesIO
 from gtts import gTTS
@@ -8,6 +10,7 @@ import logging
 class Text2Speech():
     def __init__(self) -> None:
         self.general = General()
+        self.q = Queue()
 
     async def connect(self, client, contex) -> discord.VoiceClient:
         '''
@@ -36,6 +39,19 @@ class Text2Speech():
         except Exception as e:
             logging.error(e)
             return None
+
+    def __play_next(self, voice, source):
+        try:
+            voice.play(source, after=lambda e: self.__check_queue(voice))
+        except Exception as e:
+            logging.error(f'Text2speech __play_next error : {e}')
+    def __check_queue(self, voice):
+        try:
+            if self.q.size() > 0:
+                self.__play_next(voice, self.q.dequeue())
+        
+        except Exception as e:
+            logging.error(f'Text2speech __check_queue error : {e}')
 
     async def play(self, client, contex) -> None:
         '''
@@ -70,8 +86,10 @@ class Text2Speech():
             # Play sound from buffer
             source = FFmpegPCMAudio(buffer.read(), pipe = True)
             if not voice.is_playing():
-                voice.play(source)
+                self.__play_next(voice, source)
+            else:
+                self.q.enqueue(source)
 
             await contex.message.delete(delay=5)
         except Exception as e:
-            logging.error(e)
+            logging.error(f'Text2speech play error : {e}')

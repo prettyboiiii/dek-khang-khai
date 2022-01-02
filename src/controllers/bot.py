@@ -37,3 +37,7 @@ class Bot(Bot):
         @self.command(pass_context=True)
         async def daily(contex):
             await self.ds.daily(contex)
+
+        @self.command(pass_context=True)
+        async def check(contex):
+            await self.ds.check(contex)

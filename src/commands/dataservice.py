@@ -12,97 +12,11 @@ class DataService():
         self.member = MemberService()
         self.transaction = TransactionService()
 
-    async def register(self, contex) -> None:
+    async def __createOrUpdateMember(self, contex, dcId, name):
         '''
-        Register new member
+        Create new member if not exit and update member name
         '''
-        # Delete input message
-        await contex.message.delete(delay=20)
-        author = contex.author
-        dcId = str(author._user.id)
-        name = author._user.name
-
-        # Get member by dcId
-        statusCode, result = self.member.get_member_by_dcid(dcId)
-        # If Error
-        if statusCode not in [200, 404]:
-            logging.error(f'Query member error {result}')
-            await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId), delete_after=10)
-            return 
-
-        # Insert new member if not found
-        if statusCode == 404:
-            data = {
-                "dcId":dcId,
-                "name": name,
-                "balance": 0.00,
-                "created_at": datetime.utcnow(),
-                "update_at": datetime.utcnow()
-            }
-            statusCode, result = self.member.insert_member(data)
-
-            # If Error
-            if statusCode not in [201]:
-                logging.error(f'Insert member error {result}')
-                await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId), delete_after=10)
-                return 
-            await contex.send("<@{}> คุณได้เปิดบัญชีเรียบร้อยแล้ว".format(dcId), delete_after=10)
-            return 
-            
-        # If member already exits just return message
-        if statusCode != 404:
-            await contex.send("<@{}> คุณได้เปิดบัญชีแล้ว".format(dcId), delete_after=10)
-            return
-
-    async def __insertNewTransaction(self, contex, dcId, type, amount):
-        '''
-        Insert trasaction
-        '''
-        # Get member by dcId
-        statusCode, result = self.member.get_member_by_dcid(dcId)
-        # If Error
-        if statusCode not in [200, 404]:
-            logging.error(f'Query member error {result}')
-            await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId), delete_after=10)
-            return 
-
-        data = {
-            "mid": result.id,
-            "type": type,
-            "amount": amount,
-            "contributor": None,
-            "created_at": datetime.utcnow(),
-            "update_at": datetime.utcnow()
-        }
-        statusCode, insertResult = self.transaction.insert_transaction(data)
-        if statusCode not in [201]:
-            logging.error(f'Insert transaction error : {insertResult}')
-            await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId), delete_after=10)
-            return
-
-        data = {
-            "balance": result.balance + Decimal(amount),
-            "update_at": datetime.utcnow()
-        }
-
-        statusCode, updateResult = self.member.update_member(result.id, data)
-        if statusCode not in [204]:
-            logging.error(f'Update member error : {updateResult}')
-            await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId), delete_after=10)
-            return 
-
-        await contex.send("<@{}> คุณได้รับโบนัสรายวัน {} {}".format(dcId, amount, get_settings().COIN_NAME), delete_after=10)
-
-    async def daily(self, contex) -> None:
-        '''
-        Daily trasaction
-        '''
-        await contex.message.delete(delay=20)
-        author = contex.author
-        dcId = str(author._user.id)
-        name = author._user.name
         mid = ""
-
         # Get member by dcId
         statusCode, getResult = self.member.get_member_by_dcid(dcId)
         # If Error
@@ -147,8 +61,103 @@ class DataService():
             if statusCode not in [204]:
                 logging.error(f'Update member error : {updateResult}')
                 await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId), delete_after=10)
-                return 
+                return
+        
+        return mid
 
+    async def __insertNewTransaction(self, contex, dcId, type, amount, contributor):
+        '''
+        Insert trasaction
+        '''
+        # Get member by dcId
+        statusCode, result = self.member.get_member_by_dcid(dcId)
+        # If Error
+        if statusCode not in [200, 404]:
+            logging.error(f'Query member error {result}')
+            await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId), delete_after=10)
+            return 
+
+        data = {
+            "mid": result.id,
+            "type": type,
+            "amount": amount,
+            "contributor": contributor,
+            "created_at": datetime.utcnow(),
+            "update_at": datetime.utcnow()
+        }
+        statusCode, insertResult = self.transaction.insert_transaction(data)
+        if statusCode not in [201]:
+            logging.error(f'Insert transaction error : {insertResult}')
+            await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId), delete_after=10)
+            return
+
+        data = {
+            "balance": result.balance + Decimal(amount),
+            "update_at": datetime.utcnow()
+        }
+
+        statusCode, updateResult = self.member.update_member(result.id, data)
+        if statusCode not in [204]:
+            logging.error(f'Update member error : {updateResult}')
+            await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId), delete_after=10)
+            return 
+
+        await contex.send("<@{}> คุณได้รับโบนัสรายวัน {} {}".format(dcId, amount, get_settings().COIN_NAME), delete_after=10)
+
+    async def register(self, contex) -> None:
+        '''
+        Register new member
+        '''
+        # Delete input message
+        await contex.message.delete(delay=20)
+        author = contex.author
+        dcId = str(author._user.id)
+        name = author._user.name
+
+        # Get member by dcId
+        statusCode, result = self.member.get_member_by_dcid(dcId)
+        # If Error
+        if statusCode not in [200, 404]:
+            logging.error(f'Query member error {result}')
+            await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId), delete_after=10)
+            return 
+
+        # Insert new member if not found
+        if statusCode == 404:
+            data = {
+                "dcId":dcId,
+                "name": name,
+                "balance": 0.00,
+                "created_at": datetime.utcnow(),
+                "update_at": datetime.utcnow()
+            }
+            statusCode, result = self.member.insert_member(data)
+
+            # If Error
+            if statusCode not in [201]:
+                logging.error(f'Insert member error {result}')
+                await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId), delete_after=10)
+                return 
+            await contex.send("<@{}> คุณได้เปิดบัญชีเรียบร้อยแล้ว".format(dcId), delete_after=10)
+            return 
+            
+        # If member already exits just return message
+        if statusCode != 404:
+            await contex.send("<@{}> คุณได้เปิดบัญชีแล้ว".format(dcId), delete_after=10)
+            return
+
+
+    async def daily(self, contex) -> None:
+        '''
+        Daily trasaction
+        '''
+        await contex.message.delete(delay=20)
+        author = contex.author
+        dcId = str(author._user.id)
+        name = author._user.name
+
+
+        mid = await self.__createOrUpdateMember(contex, dcId, name)
         # Get trasaction by dcId and type
         statusCode, getResult = self.transaction.get_transaction_by_mid_and_type(mid, TransactionType.DAILY.name)
 
@@ -161,7 +170,7 @@ class DataService():
         daily_value = round(random.uniform(0.001,5), 6)
 
         if statusCode == 404:
-            await self.__insertNewTransaction(contex, dcId, TransactionType.DAILY.name, daily_value)
+            await self.__insertNewTransaction(contex, dcId, TransactionType.DAILY.name, daily_value, None)
             
         if statusCode != 404:
             last_get = getResult[0].created_at
@@ -170,7 +179,7 @@ class DataService():
 
             # Get bounus if daily
             if days_diff > 0:
-                await self.__insertNewTransaction(contex, dcId, TransactionType.DAILY.name, daily_value)
+                await self.__insertNewTransaction(contex, dcId, TransactionType.DAILY.name, daily_value, None)
                 await contex.send("<@{}> คุณได้รับโบนัสรายวัน *{}* **{}**".format(dcId, daily_value, get_settings().COIN_NAME), delete_after=10)
                 return 
             # Wait until
@@ -184,3 +193,17 @@ class DataService():
                 seconds = minutes_diff[1]
                 await contex.send("<@{}> คุณสามารถรับได้อีกครั้ง *{}* ชม. *{}* นาที *{}* วินาที".format(dcId, hours, minutes, seconds), delete_after=10)
                 return 
+
+    async def check(self, contex) -> None:
+        await contex.message.delete(delay=20)
+        author = contex.author
+        dcId = str(author._user.id)
+        name = author._user.name
+        mid = await self.__createOrUpdateMember(contex, dcId, name)
+
+        statusCode, result = self.member.get_member_by_id(mid)
+        if statusCode not in [200, 404]:
+            logging.error(f'Query member error {result}')
+            await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId), delete_after=10)
+            return 
+        await contex.send("<@{}> คุณมี *{}* **{}**".format(dcId, result.balance, get_settings().COIN_NAME), delete_after=20)
