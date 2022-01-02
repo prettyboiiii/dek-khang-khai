@@ -1,6 +1,7 @@
-from pony.orm import commit, db_session
+from pony.orm import commit, db_session, rollback, desc
 from src.models.Entities import Transaction
 from uuid import UUID
+from typing import Tuple
 
 
 class TransactionRepository:
@@ -21,58 +22,62 @@ class TransactionRepository:
             commit()
             return None, result.id
         except Exception as e:
+            rollback()
             return str(e), None
 
     @db_session
-    def get(self):
+    def get_by_id(self, id:str) -> Tuple[Transaction]:
         '''
         Get all Transaction from database
 
         return log(Any), result(Any)
         '''
         try:
-            Transactions = Transaction.select()
-            results = [ Transaction for Transaction in Transactions ]
+            results = Transaction.select(id=id)
+            if results is None:
+                return "Not found", None
             return None, results
         except Exception as e:
+            rollback()
             return str(e), None
 
-    @db_session
-    def get_by_dcId(self, dcId: str):
+    def get_by_mid_and_type(self, mid:str, type: str) -> Tuple[Transaction]:
         '''
-        Get Transaction from database by using dcId
-        dcId : str
+        Get Transaction from database by mid and type ,also include order by create at
 
         return log(Any), result(Any)
         '''
         try:
-            result = Transaction.get(dcId=dcId)
-            return None, result
+            results = Transaction.select(mid=mid, type=type)
+            if len(list(results)) == 0:
+                return "Not found", None
+            return None, list(results.order_by(desc(Transaction.created_at))[:1])
         except Exception as e:
+            rollback()
             return str(e), None
 
     @db_session
     def update(self, id: str, data: dict):
         '''
-        update Transaction object by specific id
+        update Transaction object by id
         id : str
         data : AIConfig<dict>
 
         return log(Any), result(Any)
         '''
         try:
-            result = Transaction.get(id=UUID(id))
+            result = Transaction.get(id=id)
             result.set(**data)
             commit()
             return None, result.id
-
         except Exception as e:
+            rollback()
             return str(e), None
 
     @db_session
     def delete(self, id: str):
         '''
-        delete ai_config object by id
+        delete Transaction object by id
         id : str
 
         return log(Any), result(Any)
@@ -83,4 +88,5 @@ class TransactionRepository:
             commit()
             return None, id
         except Exception as e:
+            rollback()
             return str(e), None

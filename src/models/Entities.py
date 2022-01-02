@@ -1,6 +1,5 @@
 from src.providers.databases.ponyORM import PonyORMService
-from src.models.TransactionType import TransactionType
-from pony.orm import PrimaryKey, Required, Set
+from pony.orm import PrimaryKey, Required, Optional ,Set
 from datetime import datetime
 from uuid import UUID, uuid4
 from decimal import Decimal
@@ -16,16 +15,16 @@ class Member(db.Entity):
     balance = Required(Decimal, 10, 2, default=0.00)
     created_at = Required(datetime)
     update_at = Required(datetime)
-    transactionsOwn = Set("Transactions", reverse="mid")
-    transactionsDest = Set("Transactions", reverse="contributor")
+    transactionsOwn = Set("Transaction", reverse="mid")
+    transactionsDest = Set("Transaction", reverse="contributor")
 
-class Transactions(db.Entity):
-    _table_ = "TBL_Transactions"
+class Transaction(db.Entity):
+    _table_ = "TBL_Transaction"
     id = PrimaryKey(UUID, auto=True, default=uuid4)
     mid = Required(Member)
     type = Required(str)
     amount = Required(Decimal, 10, 2, default=0.00)
-    contributor = Required(Member, nullable=True)
+    contributor = Optional(Member, nullable=True)
     created_at = Required(datetime)
     update_at = Required(datetime)
 

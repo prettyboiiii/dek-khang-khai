@@ -13,6 +13,7 @@ class AppSettings(BaseSettings):
     DB_PASSWORD: str
     DB_USER: str
     DB_DATABASE: str
+    COIN_NAME: str = "ข้างไข่คอยด์"
 
     class Config:
         env_prefix = 'DKK_'

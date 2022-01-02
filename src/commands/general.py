@@ -3,9 +3,6 @@ import logging
 
 class General():
 
-    def on_ready(self, client) -> None:
-        print('We have logged in as {0.user}'.format(client))
-
     async def connect(self, client, contex) -> discord.VoiceClient:
         '''
         Command bot to connect to author voice channel
