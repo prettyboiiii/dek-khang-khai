@@ -1,6 +1,5 @@
 from src.providers.databases.ponyORM import PonyORMService
 from src.services.memberService import MemberService
-from datetime import datetime
 import logging
 
 m = MemberService()

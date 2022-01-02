@@ -1,4 +1,4 @@
-from typing import Sized
+from src.utils.constants.constants import VIP_LIST, PASS_LIST, SPECIAL_WORD
 from src.providers.discord.FFmpegPCMAudio import FFmpegPCMAudio
 from src.providers.discord.queue import Queue
 from src.commands.general import General
@@ -42,36 +42,35 @@ class Text2Speech():
 
     def __play_next(self, voice, source):
         try:
-            voice.play(source, after=lambda e: self.__check_queue(voice))
+            voice.play(discord.FFmpegPCMAudio(source="./src/utils/constants/noti_sound.mp3"), 
+                        after=lambda e: voice.play(source, after=lambda e: self.__check_queue(voice)))
         except Exception as e:
-            logging.error(f'Text2speech __play_next error : {e}')
+            logging.error(e)
+
     def __check_queue(self, voice):
         try:
             if self.q.size() > 0:
                 self.__play_next(voice, self.q.dequeue())
         
         except Exception as e:
-            logging.error(f'Text2speech __check_queue error : {e}')
+            logging.error(e)
 
     async def play(self, client, contex) -> None:
         '''
         Speech from text
         '''
         try:
-            vip_list = {
-                "Rung69#5581": "นิว",
-                "Lamron#9045": "หมิว"
-            }
             # Get text from message
             text = contex.message.content.split(" ")
             text.pop(0)
             text = " ".join(text)
 
-            if "เต้" in text:
-                text = "เต้สุดเท่ และ หล่อ"
+            for key, value in PASS_LIST.items():
+                if key in text:
+                    text = value
             
-            if str(contex.message.author) in vip_list.keys():
-                text = f'{vip_list[str(contex.message.author)]}กระจอก'
+            if str(contex.message.author) in VIP_LIST.keys():
+                text = f'{VIP_LIST[str(contex.message.author)]}{SPECIAL_WORD}'
 
             # Connect to voice channel
             voice = await self.connect(client, contex)
@@ -92,4 +91,4 @@ class Text2Speech():
 
             await contex.message.delete(delay=5)
         except Exception as e:
-            logging.error(f'Text2speech play error : {e}')
+            logging.error(e)

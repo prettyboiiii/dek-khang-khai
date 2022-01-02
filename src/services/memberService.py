@@ -13,7 +13,7 @@ class MemberService:
         self.member = MemberRepository()
 
     @db_session
-    def insert_member(self, data: dict) -> Tuple[int, str]:
+    def insert_member(self, data: dict) -> Tuple[int, Member]:
         '''
         Insert new Member to the dabase
         Member : Member<object>
@@ -58,7 +58,7 @@ class MemberService:
         return 200, result
 
     @db_session
-    def update_member(self, id: str, data: dict) -> Tuple[int, str]:
+    def update_member(self, id: str, data: dict) -> Tuple[int, Member]:
         '''
         Update Member that exist in database by specific id from update user data
         id : str

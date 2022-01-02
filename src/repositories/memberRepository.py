@@ -1,7 +1,6 @@
 from pony.orm import commit, db_session, rollback
 from src.models.Entities import Member
 from typing import Tuple
-from uuid import UUID
 
 
 class MemberRepository:
@@ -10,7 +9,7 @@ class MemberRepository:
     - to manage, create, update, delete and get Member in database
     '''
     @db_session
-    def add(self, data: dict) -> Tuple[str, str]:
+    def add(self, data: dict) -> Tuple[str, Member]:
         '''
         Insert member to database
         data : Member<dict>
@@ -20,7 +19,7 @@ class MemberRepository:
         try:
             result = Member(**data)
             commit()
-            return None, str(result.id)
+            return None, result
         except Exception as e:
             rollback()
             return str(e), None
@@ -59,7 +58,7 @@ class MemberRepository:
             return str(e), None
 
     @db_session
-    def update(self, id: str, data: dict) -> Tuple[str, str]:
+    def update(self, id: str, data: dict) -> Tuple[str, Member]:
         '''
         update Member object by specific id
         id : str
@@ -71,7 +70,7 @@ class MemberRepository:
             result = Member.get(id=id)
             result.set(**data)
             commit()
-            return None, str(result.id)
+            return None, result
         except Exception as e:
             rollback()
             return str(e), None

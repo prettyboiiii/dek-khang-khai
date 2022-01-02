@@ -26,8 +26,8 @@ class DataService():
             return 
 
         # Get id from member
-        if getResult is not None:
-            mid = getResult.id
+        if statusCode != 404:
+            member = getResult
 
         # Insert new member if not found
         if statusCode == 404:
@@ -46,8 +46,9 @@ class DataService():
                 await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId), delete_after=10)
                 return 
 
+            await contex.send("<@{}> คุณได้เปิดบัญชีเรียบร้อยแล้ว".format(dcId), delete_after=10)
             # Get id from member
-            mid = insertResult
+            member = insertResult
 
         # Update name
         elif getResult.name != name:
@@ -55,15 +56,17 @@ class DataService():
                 "name": name,
                 "update_at": datetime.utcnow()
             }
-            statusCode, updateResult = self.member.update_member(getResult.id, data)
+            statusCode, updateResult = self.member.update_member(getResult[0].id, data)
 
             # If Error
             if statusCode not in [204]:
                 logging.error(f'Update member error : {updateResult}')
                 await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId), delete_after=10)
                 return
+
+            member = updateResult
         
-        return mid
+        return member
 
     async def __insertNewTransaction(self, contex, dcId, type, amount, contributor):
         '''
@@ -157,7 +160,7 @@ class DataService():
         name = author._user.name
 
 
-        mid = await self.__createOrUpdateMember(contex, dcId, name)
+        mid = await self.__createOrUpdateMember(contex, dcId, name).id
         # Get trasaction by dcId and type
         statusCode, getResult = self.transaction.get_transaction_by_mid_and_type(mid, TransactionType.DAILY.name)
 
@@ -199,7 +202,7 @@ class DataService():
         author = contex.author
         dcId = str(author._user.id)
         name = author._user.name
-        mid = await self.__createOrUpdateMember(contex, dcId, name)
+        mid = await self.__createOrUpdateMember(contex, dcId, name).id
 
         statusCode, result = self.member.get_member_by_id(mid)
         if statusCode not in [200, 404]:
