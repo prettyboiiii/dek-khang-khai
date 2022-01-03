@@ -4,6 +4,8 @@ from src.commands.text2speech import Text2Speech
 from src.commands.dataservice import DataService
 from src.events.general import General as GE
 from discord.ext.commands import Bot
+import discord
+import logging
 
 class Bot(Bot):
     def __init__(self) -> None:
@@ -41,3 +43,40 @@ class Bot(Bot):
         @self.command(pass_context=True)
         async def check(contex):
             await self.ds.check(contex)
+
+        @self.command(pass_context=True)
+        async def send(contex, receiver: discord.User, amount):
+            try:
+                float(amount)
+                await self.ds.send(contex, receiver, float(amount))
+            except ValueError:
+                await contex.send("<@{}> ใส่ค่าจำนวนเงินที่ส่งเป็นเลขจำนวนจริง และ ต้องมากว่า 0.00"
+                                    .format(str(contex.author._user.id)), 
+                                    delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
+                return 
+            except Exception as e:
+                logging.error(f'[Bot.send] : {e}')
+                await contex.send("<@{}> คำสั่งเกิดข้อผิดพลาดกรุณาใส่ .send @[ผู้รับเงิน] [จำนวนเงินที่ให้ (เลขจำนวนจริงที่มากว่า 0)]"
+                                    .format(str(contex.author._user.id)), 
+                                    delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
+                return 
+
+        @self.command(pass_context=True)
+        async def bet(contex, amount):
+            try:
+                float(amount)
+                await self.ds.bet(contex, float(amount))
+            except ValueError:
+                await contex.send("<@{}> ใส่ค่าเดิมพันเป็นเลขจำนวนจริง และ ต้องมากว่า 0.00"
+                                    .format(str(contex.author._user.id)), 
+                                    delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
+                return 
+
+            except Exception as e:
+                logging.error(f'[Bot.bet] : {e}')
+                await contex.send("<@{}> คำสั่งเกิดข้อผิดพลาดกรุณาใส่ .bet [เงินเดิมพัน (เลขจำนวนจริงที่มากว่า 0)]"
+                                    .format(str(contex.author._user.id)), 
+                                    delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
+                return 
+
+
