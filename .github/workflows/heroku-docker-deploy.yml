@@ -4,20 +4,30 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+    
+#set environment variables 
+env:
+  HEROKU_API_EMAIL: ${{ secrets.HEROKU_EMAIL }}
+  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+  HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+      
+  deploy:
+    name: Deploy to Heroku
+    runs-on: ubuntu-18.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Build, Push and Deploy to Heroku
-        id: heroku
-        uses: jctaveras/heroku-deploy@v1.0.0
-        with:
-          email: ${{ secrets.HEROKU_EMAIL }} # your heroku email
-          api_key: ${{ secrets.HEROKU_API_KEY }} # your heroku api key
-          app_name: ${{ secrets.HEROKU_APP_NAME }} # you aplication name
-          dockerfile_path: '' # set the path to the folder where the Dockerfile is located
-          options: '' # Docker Build Options
-          formation: 'worker' # Docker Dyno Formation. By default is web
+
+    # Clone the repository
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Build Docker image
+    - name: Docker build
+      run: docker login --username=_ --password=$HEROKU_API_KEY registry.heroku.com
+
+    # Push the Docker image to Heroku Container Registry
+    - name: Publish
+      run: |
+        heroku container:push worker -a $HEROKU_APP_NAME
+        heroku container:release worker -a $HEROKU_APP_NAME
