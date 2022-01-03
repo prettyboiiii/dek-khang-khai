@@ -13,8 +13,8 @@ class Member(db.Entity):
     dcId = Required(str, unique=True)
     name = Required(str)
     balance = Required(Decimal, 10, 6, default=0.00)
-    created_at = Required(datetime)
-    update_at = Required(datetime)
+    created_at = Required(datetime, default=datetime.utcnow())
+    update_at = Required(datetime, default=datetime.utcnow())
     transactionsOwn = Set("Transaction", reverse="mid")
     transactionsDest = Set("Transaction", reverse="contributor")
 
@@ -25,7 +25,7 @@ class Transaction(db.Entity):
     type = Required(str)
     amount = Required(Decimal, 10, 6, default=0.00)
     contributor = Optional(Member, nullable=True)
-    created_at = Required(datetime)
-    update_at = Required(datetime)
+    created_at = Required(datetime, default=datetime.utcnow())
+    update_at = Required(datetime, default=datetime.utcnow())
 
 pony.migrate(db)

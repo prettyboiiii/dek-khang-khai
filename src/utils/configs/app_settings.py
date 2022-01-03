@@ -15,7 +15,7 @@ class AppSettings(BaseSettings):
     DB_DATABASE: str
     COIN_NAME: str = "ข้างไข่คอยด์"
     MAX_BET: float = 20.0
-    MIN_BET: float = 0.5
+    MIN_BET: float = 0.1
     SELF_MESSAGE_DELETE_TIME: int
 
     class Config:

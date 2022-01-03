@@ -38,8 +38,6 @@ class DataService():
                     "dcId":dcId,
                     "name": name,
                     "balance": 0.00,
-                    "created_at": datetime.utcnow(),
-                    "update_at": datetime.utcnow()
                 }
                 statusCode, insertResult = self.member.insert_member(data)
             
@@ -93,23 +91,22 @@ class DataService():
                                                                     , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                 return 
 
-            data = {
-                "mid": result.id,
-                "type": type,
-                "amount": amount,
-                "contributor": contributor,
-                "created_at": datetime.utcnow(),
-                "update_at": datetime.utcnow()
-            }
-            statusCode, insertResult = self.transaction.insert_transaction(data)
-            # If Error
-            if statusCode not in [201]:
-                logging.error(f'[DataService.__insertNewTransaction] Insert transaction : {insertResult}')
-                await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
-                                                                    , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
-                return
-
             if contributor is None:
+
+                data = {
+                    "mid": result.id,
+                    "type": type,
+                    "amount": amount,
+                    "contributor": contributor,
+                }
+
+                statusCode, insertResult = self.transaction.insert_transaction(data)
+                # If Error
+                if statusCode not in [201]:
+                    logging.error(f'[DataService.__insertNewTransaction] Insert transaction : {insertResult}')
+                    await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
+                                                                        , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
+                    return
 
                 data = {
                     "balance": result.balance + Decimal(amount),
@@ -125,6 +122,22 @@ class DataService():
                     return
         
             else:
+                # Create transaction
+                data = {
+                    "mid": result.id,
+                    "type": type,
+                    "amount": amount,
+                    "contributor": contributor.id,
+                }
+
+                statusCode, insertResult = self.transaction.insert_transaction(data)
+                # If Error
+                if statusCode not in [201]:
+                    logging.error(f'[DataService.__insertNewTransaction] Insert transaction : {insertResult}')
+                    await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
+                                                                        , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
+                    return
+
                 # Sender
                 data = {
                     "balance": result.balance - Decimal(amount),
@@ -140,19 +153,19 @@ class DataService():
                     return
 
                 # Receiver
-                data = {
-                    "balance": result.balance - Decimal(amount),
-                    "update_at": datetime.utcnow()
-                }
-
                 # Get member by dcId
-                statusCode, result = self.member.get_member_by_dcid(contributor)
+                statusCode, result = self.member.get_member_by_dcid(contributor.dcId)
                 # If Error
                 if statusCode not in [200, 404]:
                     logging.error(f'[DataService.__insertNewTransaction] Query member : {result}')
                     await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
                                                                     , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                     return 
+
+                data = {
+                    "balance": result.balance + Decimal(amount),
+                    "update_at": datetime.utcnow()
+                }
 
                 statusCode, updateResult = self.member.update_member(result.id, data)
                 # If Error
@@ -194,8 +207,6 @@ class DataService():
                     "dcId":dcId,
                     "name": name,
                     "balance": 0.00,
-                    "created_at": datetime.utcnow(),
-                    "update_at": datetime.utcnow()
                 }
                 statusCode, result = self.member.insert_member(data)
 
@@ -233,9 +244,9 @@ class DataService():
 
         try:
 
-            mid = await self.__createOrUpdateMember(contex, dcId, name).id
+            member = await self.__createOrUpdateMember(contex, dcId, name)
             # Get trasaction by dcId and type
-            statusCode, getResult = self.transaction.get_transaction_by_mid_and_type(mid, TransactionType.DAILY.name)
+            statusCode, getResult = self.transaction.get_transaction_by_mid_and_type(member.id, TransactionType.DAILY.name)
 
             # If Error
             if statusCode not in [200, 404]:
@@ -323,18 +334,21 @@ class DataService():
 
             member = await self.__createOrUpdateMember(contex, dcId, name)
 
-            statusCode, receiver = self.member.get_member_by_dcid(receiverI.id)
+            # Search for receiver
+            statusCode, receiver = self.member.get_member_by_dcid(str(receiverI.id))
             if statusCode not in [200]:
                 await contex.send("{} ผู้ใช้นี้ไม่มีในระบบ"
                                     .format(receiverI.id), delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                 return
 
+            # Balance less than amount
             if member.balance < amount:
                 await contex.send("<@{}> คุณไม่มีเหรียญที่จะส่ง"
                                     .format(member.dcId), delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                 return
 
-            await self.__insertNewTransaction(contex, member.dcId, TransactionType.SEND.name, amount, contributor=receiver.dcId)
+            await self.__insertNewTransaction(contex, member.dcId, TransactionType.SEND.name, amount, 
+                                                contributor=receiver)
             
             await contex.send("<@{}> คุณได้ส่ง *{}* **{}** ไปยัง <@{}>"
                                 .format(member.dcId, amount, get_settings().COIN_NAME, receiver.dcId))
