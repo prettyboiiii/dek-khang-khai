@@ -2,8 +2,6 @@ name: Deploy Docker Image to Heroku App
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
     
 #set environment variables 
 env:
