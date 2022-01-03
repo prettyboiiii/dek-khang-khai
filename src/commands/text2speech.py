@@ -1,6 +1,6 @@
 from src.utils.constants.constants import VIP_LIST, PASS_LIST, SPECIAL_WORD
 from src.providers.discord.FFmpegPCMAudio import FFmpegPCMAudio
-from src.providers.discord.queue import Queue
+from src.providers.queue.queue import Queue
 from src.commands.general import General
 from io import BytesIO
 from gtts import gTTS
