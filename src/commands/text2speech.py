@@ -27,7 +27,7 @@ class Text2Speech():
 
     def __text2spech(self, text) -> BytesIO:
         try:
-            # Init buffe
+            # Init buffer
             buffer = BytesIO()
             # Covert text to speech
             t2p = gTTS(text=str(text), lang='th', slow=True)
@@ -37,27 +37,32 @@ class Text2Speech():
 
             return buffer
         except Exception as e:
-            logging.error(e)
+            logging.error(f'[Text2Speech.__text2spech] : {e}')
             return None
 
     def __play_next(self, voice, source):
         try:
+            # Play sound
             voice.play(discord.FFmpegPCMAudio(source="./src/utils/constants/noti_sound.mp3"), 
                         after=lambda e: voice.play(source, after=lambda e: self.__check_queue(voice)))
         except Exception as e:
-            logging.error(e)
+            logging.error(f'[Text2Speech.__play_next] : {e}')
 
     def __check_queue(self, voice):
+        '''
+        Check queue is empty or not
+        '''
         try:
+            # If queue is not empty play next queue
             if self.q.size() > 0:
                 self.__play_next(voice, self.q.dequeue())
         
         except Exception as e:
-            logging.error(e)
+            logging.error(f'[Text2Speech.__check_queue] : {e}')
 
     async def play(self, client, contex) -> None:
         '''
-        Speech from text
+        Command bot to speech from text
         '''
         try:
             # Get text from message
@@ -66,7 +71,7 @@ class Text2Speech():
             text = " ".join(text)
 
             for key, value in PASS_LIST.items():
-                if key in text:
+                if key in text.lower():
                     text = value
             
             if str(contex.message.author) in VIP_LIST.keys():
@@ -91,4 +96,4 @@ class Text2Speech():
 
             await contex.message.delete(delay=5)
         except Exception as e:
-            logging.error(e)
+            logging.error(f'[Text2Speech.play] : {e}')

@@ -17,14 +17,13 @@ class General():
             voice = discord.utils.get(client.voice_clients, guild=contex.guild)
             if voice and voice.is_connected():
                 await voice.move_to(channel)
-                logging.info("Connect to {} voice channel".format(channel))
             else:
+                logging.info("Connect to {} voice channel".format(channel))
                 voice = await channel.connect()
             
             return voice
         except Exception as e:
-            logging.error(e)
-
+            logging.error(f'[General.connect] : {e}')
             return None
 
     async def disconnect(self, client, contex) -> None:
@@ -36,4 +35,4 @@ class General():
             await voiceClient.disconnect()
             logging.info("Disconnet from {} voice channel".format(contex.message.author.voice.channel))
         except Exception as e:
-            logging.error(e)
+            logging.error(f'[General.disconnect] : {e}')

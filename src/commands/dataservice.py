@@ -209,6 +209,9 @@ class DataService():
             logging.error(f'[DataService.daily] : {e}')
 
     async def check(self, contex) -> None:
+        '''
+        Check balance of member
+        '''
         try:
             await contex.message.delete(delay=20)
             author = contex.author

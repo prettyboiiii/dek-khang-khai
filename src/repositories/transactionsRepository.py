@@ -20,7 +20,7 @@ class TransactionRepository:
         try:
             result = Transaction(**data)
             commit()
-            return None, result.id
+            return None, result
         except Exception as e:
             rollback()
             return str(e), None
@@ -69,7 +69,7 @@ class TransactionRepository:
             result = Transaction.get(id=id)
             result.set(**data)
             commit()
-            return None, result.id
+            return None, result
         except Exception as e:
             rollback()
             return str(e), None
