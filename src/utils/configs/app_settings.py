@@ -16,7 +16,7 @@ class AppSettings(BaseSettings):
     COIN_NAME: str = "ข้างไข่คอยด์"
     MAX_BET: float = 20.0
     MIN_BET: float = 0.5
-    SELF_MESSAGE_DELETE_TIME: int = 10
+    SELF_MESSAGE_DELETE_TIME: int
 
     class Config:
         env_prefix = 'DKK_'
