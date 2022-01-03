@@ -1,8 +1,9 @@
-# Dek Khang Khai
+# Dek Khang Khai 
+![Status](https://github.com/likeajob/dek-khang-khai/actions/workflows/heroku-docker-deploy.yml/badge.svg) <br>
 Dek Khang Khai is a discord bot that use for play gamble (tail or head), also include can convert text to speech and play it in voice channel
 
 ## :gear: Run on local
-1. Install python virtual environment such as Ancona pipenv etc.
+1. Install python virtual environment such as Aancona pipenv etc.
 2. Install python package by using
 ```
 pip install -r requirements.txt
@@ -21,7 +22,12 @@ DKK_DB_PASSWORD=[Database password]
 DKK_DB_DATABASE=[Database name]
 DKK_SELF_MESSAGE_DELETE_TIME=[The time input message will delete]
 ```
-5. Run
+5. Expose environment variable by using
+```
+source .env
+```
+
+6. Run
 ```
 python main.py
 ```
