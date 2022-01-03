@@ -1,10 +1,11 @@
 # Dek Khang Khai
+Dek Khang Khai is a discord bot that use for play gamble (tail or head), also include can convert text to speech and play it in voice channel
 
 ## :gear: Run local
 1. Install python virtual environment such as Ancona pipenv etc.
 2. Install python package by using
 ```
-    pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 3. Create environment variable file by using
 ```
