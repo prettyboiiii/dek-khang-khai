@@ -6,3 +6,4 @@ class TransactionType(Enum):
     RECEIVE = 2
     BET = 3
     HOURLY = 4
+    DONATE = 5

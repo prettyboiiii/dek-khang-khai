@@ -17,6 +17,7 @@ class AppSettings(BaseSettings):
     MAX_BET: float = 20.0
     MIN_BET: float = 0.1
     SELF_MESSAGE_DELETE_TIME: int
+    PRICE: float = 0.001
 
     class Config:
         env_prefix = 'DKK_'
