@@ -255,7 +255,7 @@ class DataService():
                                                                     , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                 return
 
-            daily_value = round(random.uniform(0.001,5), 6)
+            daily_value = round(random.uniform(2,6), 6)
 
             if statusCode == 404:
                 await self.__insertNewTransaction(contex, dcId, TransactionType.DAILY.name, daily_value, contributor=None)
@@ -412,6 +412,68 @@ class DataService():
 
         except Exception as e:
             logging.error(f'[DataService.bet] : {e}')
+            await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
+                                                            , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
+            return
+
+    async def hourly(self, contex) -> None:
+        '''
+        Hourly trasaction
+        '''
+        await contex.message.delete(delay=20)
+        author = contex.author
+        dcId = str(author._user.id)
+        name = author._user.name
+
+        try:
+
+            member = await self.__createOrUpdateMember(contex, dcId, name)
+            # Get trasaction by dcId and type
+            statusCode, getResult = self.transaction.get_transaction_by_mid_and_type(member.id, TransactionType.HOURLY.name)
+
+            # If Error
+            if statusCode not in [200, 404]:
+                logging.error(f'[DataService.hourly] Query transaction : {getResult}')
+                await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
+                                                                    , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
+                return
+
+            hourly_value = round(random.uniform(0.000001,2), 6)
+
+            if statusCode == 404:
+                await self.__insertNewTransaction(contex, dcId, TransactionType.HOURLY.name, hourly_value, contributor=None)
+                await contex.send("<@{}> คุณได้รับโบนัสรายชั่วโมง {} {}"
+                                    .format(dcId, hourly_value, get_settings().COIN_NAME)
+                                    , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
+
+            if statusCode != 404:
+                last_get = getResult[0].created_at
+                diff = datetime.utcnow() - last_get
+                hours_diff = diff.seconds / 3600
+                print(hours_diff)
+
+                # Get bounus if daily
+                if hours_diff >= 1:
+                    await self.__insertNewTransaction(contex, dcId, TransactionType.DAILY.name, hourly_value, contributor=None)
+                    await contex.send("<@{}> คุณได้รับโบนัสรายชั่วโมง *{}* **{}**"
+                                        .format(dcId, hourly_value, get_settings().COIN_NAME)
+                                        , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
+                    return 
+                # Wait until
+                else:
+                    next_hour = last_get + timedelta(hours=1)
+                    seconds_diff = (next_hour - datetime.utcnow()).seconds
+                    hours_diff   = divmod(seconds_diff, 3600)
+                    minutes_diff = divmod(hours_diff[1], 60)
+                    minutes = minutes_diff[0]
+                    seconds = minutes_diff[1]
+                    await contex.send("<@{}> คุณสามารถรับได้อีกครั้ง *{}* นาที *{}* วินาที"
+                                        .format(dcId, minutes, seconds)
+                                        , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
+                    return
+            return 
+        except Exception as e:
+            logging.error(f'[DataService.daily] : {e}')
             await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
                                                             , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
             return
