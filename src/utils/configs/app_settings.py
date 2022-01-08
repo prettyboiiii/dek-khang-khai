@@ -13,7 +13,7 @@ class AppSettings(BaseSettings):
     DB_PASSWORD: str
     DB_USER: str
     DB_DATABASE: str
-    COIN_NAME: str = "ข้างไข่คอยด์"
+    COIN_NAME: str = "ข้างไข่คอยน์"
     MAX_BET: float = 20.0
     MIN_BET: float = 0.1
     SELF_MESSAGE_DELETE_TIME: int
