@@ -3,10 +3,12 @@ from src.utils.configs.app_settings import get_settings
 from src.models.TransactionType import TransactionType
 from src.services.memberService import MemberService
 from datetime import datetime, timedelta
-from decimal import Decimal
+from decimal import Decimal, getcontext
 import logging
 import random
 import discord
+
+getcontext().prec = 6
 
 class DataService():
     def __init__(self) -> None:
@@ -316,7 +318,7 @@ class DataService():
                                                             , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
             return
 
-    async def send(self, contex, receiverI: discord.User, amount: float):
+    async def send(self, contex, receiverI: discord.User, amount: Decimal):
         '''
         Send coin to one user to another user
         '''
@@ -361,7 +363,7 @@ class DataService():
                                                             , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
             return
 
-    async def bet(self, contex, amount: float):
+    async def bet(self, contex, amount: Decimal):
         '''
         Bet 
         '''
@@ -369,7 +371,6 @@ class DataService():
         dcId = str(author._user.id)
         name = author._user.name
         try:
-            
             # Check amount
             if amount < 0:
                 await contex.message.delete(delay=20)
