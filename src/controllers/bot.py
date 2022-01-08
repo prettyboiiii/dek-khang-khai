@@ -79,4 +79,6 @@ class Bot(Bot):
                                     delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                 return 
 
-
+        @self.command(pass_context=True)
+        async def hourly(contex):
+            await self.ds.hourly(contex)
