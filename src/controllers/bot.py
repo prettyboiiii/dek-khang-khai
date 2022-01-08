@@ -1,3 +1,4 @@
+from decimal import Decimal
 from src.utils.configs.app_settings import get_settings
 from src.utils.helpers.logging import setup_logging
 from src.commands.text2speech import Text2Speech
@@ -47,8 +48,8 @@ class Bot(Bot):
         @self.command(pass_context=True)
         async def send(contex, receiver: discord.User, amount):
             try:
-                float(amount)
-                await self.ds.send(contex, receiver, float(amount))
+                Decimal(amount)
+                await self.ds.send(contex, receiver, Decimal(amount))
             except ValueError:
                 await contex.send("<@{}> ใส่ค่าจำนวนเงินที่ส่งเป็นเลขจำนวนจริง และ ต้องมากว่า 0.00"
                                     .format(str(contex.author._user.id)), 
@@ -64,8 +65,8 @@ class Bot(Bot):
         @self.command(pass_context=True)
         async def bet(contex, amount):
             try:
-                float(amount)
-                await self.ds.bet(contex, float(amount))
+                Decimal(amount)
+                await self.ds.bet(contex, Decimal(amount))
             except ValueError:
                 await contex.send("<@{}> ใส่ค่าเดิมพันเป็นเลขจำนวนจริง และ ต้องมากว่า 0.00"
                                     .format(str(contex.author._user.id)), 
