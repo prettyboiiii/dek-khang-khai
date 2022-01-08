@@ -15,7 +15,7 @@ class DataService():
         self.member = MemberService()
         self.transaction = TransactionService()
 
-    async def __createOrUpdateMember(self, contex, dcId, name):
+    async def createOrUpdateMember(self, contex, dcId, name):
         '''
         Create new member if not exit and update member name
         '''
@@ -25,7 +25,7 @@ class DataService():
             statusCode, getResult = self.member.get_member_by_dcid(dcId)
             # If Error
             if statusCode not in [200, 404]:
-                logging.error(f'[DataService.__createOrUpdateMember] Query member : {getResult}')
+                logging.error(f'[DataService.createOrUpdateMember] Query member : {getResult}')
                 await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
                                                                     , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                 return 
@@ -45,7 +45,7 @@ class DataService():
             
                 # If Error
                 if statusCode not in [201]:
-                    logging.error(f'[DataService.__createOrUpdateMember] Insert member : {insertResult}')
+                    logging.error(f'[DataService.createOrUpdateMember] Insert member : {insertResult}')
                     await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
                                                                     , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                     return 
@@ -65,7 +65,7 @@ class DataService():
 
                 # If Error
                 if statusCode not in [204]:
-                    logging.error(f'[DataService.__createOrUpdateMember] Update member : {updateResult}')
+                    logging.error(f'[DataService.createOrUpdateMember] Update member : {updateResult}')
                     await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
                                                                     , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                     return
@@ -74,12 +74,12 @@ class DataService():
             
             return member
         except Exception as e:
-            logging.error(f'[DataService.__createOrUpdateMember] : {e}')
+            logging.error(f'[DataService.createOrUpdateMember] : {e}')
             await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
                                                             , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
             return
 
-    async def __insertNewTransaction(self, contex, dcId, type, amount, contributor=None):
+    async def insertNewTransaction(self, contex, dcId, type, amount, contributor=None):
         '''
         Insert trasaction
         '''
@@ -88,7 +88,7 @@ class DataService():
             statusCode, result = self.member.get_member_by_dcid(dcId)
             # If Error
             if statusCode not in [200, 404]:
-                logging.error(f'[DataService.__insertNewTransaction] Query member : {result}')
+                logging.error(f'[DataService.insertNewTransaction] Query member : {result}')
                 await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
                                                                     , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                 return 
@@ -105,7 +105,7 @@ class DataService():
                 statusCode, insertResult = self.transaction.insert_transaction(data)
                 # If Error
                 if statusCode not in [201]:
-                    logging.error(f'[DataService.__insertNewTransaction] Insert transaction : {insertResult}')
+                    logging.error(f'[DataService.insertNewTransaction] Insert transaction : {insertResult}')
                     await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
                                                                         , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                     return
@@ -118,7 +118,7 @@ class DataService():
                 statusCode, updateResult = self.member.update_member(result.id, data)
                 # If Error
                 if statusCode not in [204]:
-                    logging.error(f'[DataService.__insertNewTransaction] Update member : {updateResult}')
+                    logging.error(f'[DataService.insertNewTransaction] Update member : {updateResult}')
                     await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
                                                                     , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                     return
@@ -135,7 +135,7 @@ class DataService():
                 statusCode, insertResult = self.transaction.insert_transaction(data)
                 # If Error
                 if statusCode not in [201]:
-                    logging.error(f'[DataService.__insertNewTransaction] Insert transaction : {insertResult}')
+                    logging.error(f'[DataService.insertNewTransaction] Insert transaction : {insertResult}')
                     await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
                                                                         , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                     return
@@ -149,7 +149,7 @@ class DataService():
                 statusCode, updateResult = self.member.update_member(result.id, data)
                 # If Error
                 if statusCode not in [204]:
-                    logging.error(f'[DataService.__insertNewTransaction] Update member : {updateResult}')
+                    logging.error(f'[DataService.insertNewTransaction] Update member : {updateResult}')
                     await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
                                                                     , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                     return
@@ -159,7 +159,7 @@ class DataService():
                 statusCode, result = self.member.get_member_by_dcid(contributor.dcId)
                 # If Error
                 if statusCode not in [200, 404]:
-                    logging.error(f'[DataService.__insertNewTransaction] Query member : {result}')
+                    logging.error(f'[DataService.insertNewTransaction] Query member : {result}')
                     await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
                                                                     , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                     return 
@@ -172,13 +172,13 @@ class DataService():
                 statusCode, updateResult = self.member.update_member(result.id, data)
                 # If Error
                 if statusCode not in [204]:
-                    logging.error(f'[DataService.__insertNewTransaction] Update member : {updateResult}')
+                    logging.error(f'[DataService.insertNewTransaction] Update member : {updateResult}')
                     await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
                                                                     , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                     return
             return 
         except Exception as e:
-            logging.error(f'[DataService.__insertNewTransaction] : {e}')
+            logging.error(f'[DataService.insertNewTransaction] : {e}')
             await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
                                                             , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
             return
@@ -246,7 +246,7 @@ class DataService():
 
         try:
 
-            member = await self.__createOrUpdateMember(contex, dcId, name)
+            member = await self.createOrUpdateMember(contex, dcId, name)
             # Get trasaction by dcId and type
             statusCode, getResult = self.transaction.get_transaction_by_mid_and_type(member.id, TransactionType.DAILY.name)
 
@@ -260,7 +260,7 @@ class DataService():
             daily_value = round(random.uniform(2,6), 6)
 
             if statusCode == 404:
-                await self.__insertNewTransaction(contex, dcId, TransactionType.DAILY.name, daily_value, contributor=None)
+                await self.insertNewTransaction(contex, dcId, TransactionType.DAILY.name, daily_value, contributor=None)
                 await contex.send("<@{}> คุณได้รับโบนัสรายวัน {} {}"
                                     .format(dcId, daily_value, get_settings().COIN_NAME)
                                     , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
@@ -272,7 +272,7 @@ class DataService():
 
                 # Get bounus if daily
                 if days_diff > 0:
-                    await self.__insertNewTransaction(contex, dcId, TransactionType.DAILY.name, daily_value, contributor=None)
+                    await self.insertNewTransaction(contex, dcId, TransactionType.DAILY.name, daily_value, contributor=None)
                     await contex.send("<@{}> คุณได้รับโบนัสรายวัน *{}* **{}**"
                                         .format(dcId, daily_value, get_settings().COIN_NAME)
                                         , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
@@ -306,7 +306,7 @@ class DataService():
         name = author._user.name
         try:
 
-            member = await self.__createOrUpdateMember(contex, dcId, name)
+            member = await self.createOrUpdateMember(contex, dcId, name)
 
             await contex.send("<@{}> คุณมี *{}* **{}**"
                                 .format(dcId, member.balance, get_settings().COIN_NAME))
@@ -334,7 +334,7 @@ class DataService():
                                     .format(dcId), delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                 return 
 
-            member = await self.__createOrUpdateMember(contex, dcId, name)
+            member = await self.createOrUpdateMember(contex, dcId, name)
 
             # Search for receiver
             statusCode, receiver = self.member.get_member_by_dcid(str(receiverI.id))
@@ -349,7 +349,7 @@ class DataService():
                                     .format(member.dcId), delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                 return
 
-            await self.__insertNewTransaction(contex, member.dcId, TransactionType.SEND.name, amount, 
+            await self.insertNewTransaction(contex, member.dcId, TransactionType.SEND.name, amount, 
                                                 contributor=receiver)
             
             await contex.send("<@{}> คุณได้ส่ง *{}* **{}** ไปยัง <@{}>"
@@ -378,7 +378,7 @@ class DataService():
                                     .format(dcId), delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                 return 
 
-            member = await self.__createOrUpdateMember(contex, dcId, name)
+            member = await self.createOrUpdateMember(contex, dcId, name)
 
             # Maximun bet value
             if amount > get_settings().MAX_BET:
@@ -404,10 +404,10 @@ class DataService():
 
             if random.randint(0, 1):
                 await contex.send("<@{}> คุณชนะการพนันได้รับ *{}* **{}**".format(dcId, amount, get_settings().COIN_NAME))
-                await self.__insertNewTransaction(contex, member.dcId, TransactionType.BET.name, amount, contributor=None)
+                await self.insertNewTransaction(contex, member.dcId, TransactionType.BET.name, amount, contributor=None)
             else:
                 await contex.send("<@{}> คุณแพ้การพนันเสีย *{}* **{}** ว้ายยยยย".format(dcId, amount, get_settings().COIN_NAME))
-                await self.__insertNewTransaction(contex, member.dcId, TransactionType.BET.name, -1*amount, contributor=None)
+                await self.insertNewTransaction(contex, member.dcId, TransactionType.BET.name, -1*amount, contributor=None)
             
             return
 
@@ -428,7 +428,7 @@ class DataService():
 
         try:
 
-            member = await self.__createOrUpdateMember(contex, dcId, name)
+            member = await self.createOrUpdateMember(contex, dcId, name)
             # Get trasaction by dcId and type
             statusCode, getResult = self.transaction.get_transaction_by_mid_and_type(member.id, TransactionType.HOURLY.name)
 
@@ -439,10 +439,10 @@ class DataService():
                                                                     , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                 return
 
-            hourly_value = round(random.uniform(0.000001,2), 6)
+            hourly_value = round(random.uniform(0.1,2), 6)
 
             if statusCode == 404:
-                await self.__insertNewTransaction(contex, dcId, TransactionType.HOURLY.name, hourly_value, contributor=None)
+                await self.insertNewTransaction(contex, dcId, TransactionType.HOURLY.name, hourly_value, contributor=None)
                 await contex.send("<@{}> คุณได้รับโบนัสรายชั่วโมง {} {}"
                                     .format(dcId, hourly_value, get_settings().COIN_NAME)
                                     , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
@@ -454,7 +454,7 @@ class DataService():
 
                 # Get bounus if daily
                 if hours_diff >= 1:
-                    await self.__insertNewTransaction(contex, dcId, TransactionType.HOURLY.name, hourly_value, contributor=None)
+                    await self.insertNewTransaction(contex, dcId, TransactionType.HOURLY.name, hourly_value, contributor=None)
                     await contex.send("<@{}> คุณได้รับโบนัสรายชั่วโมง *{}* **{}**"
                                         .format(dcId, hourly_value, get_settings().COIN_NAME)
                                         , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)

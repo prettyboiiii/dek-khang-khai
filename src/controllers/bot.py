@@ -8,9 +8,12 @@ from discord.ext.commands import Bot
 import discord
 import logging
 
+intents = discord.Intents.default()
+intents.members = True
+
 class Bot(Bot):
     def __init__(self) -> None:
-        super().__init__(command_prefix=get_settings().PREFIX)
+        super().__init__(command_prefix=get_settings().PREFIX, intents=intents)
         self.ge = GE()
         self.t2p = Text2Speech()
         self.ds = DataService()
