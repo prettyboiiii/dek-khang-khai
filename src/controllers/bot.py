@@ -86,4 +86,3 @@ class Bot(Bot):
         @self.command(pass_context=True)
         async def hourly(contex):
             await self.ds.hourly(contex)
-
