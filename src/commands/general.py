@@ -1,7 +1,7 @@
 import discord
 import logging
 
-from utils.configs.app_settings import get_settings
+from src.utils.configs.app_settings import get_settings
 
 class General():
 
