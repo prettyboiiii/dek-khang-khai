@@ -109,7 +109,7 @@ class Text2Speech():
                 voice = await self.connect(client, contex)
                 if voice is None:
                     return None
-                await contex.send("<@{}> ได้โดเนทเป็นจำนวน *{}* **{}**".format(dcId, amount, get_settings().COIN_NAME))
+                await contex.send("<@{}> ได้โดเนทเป็นจำนวน *{}* **{}**".format(dcId, amount, get_settings().COIN_NAME), delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                 await self.ds.insertNewTransaction(contex, member.dcId, TransactionType.DONATE.name, -1*amount, contributor=None)
             
             member_list = []

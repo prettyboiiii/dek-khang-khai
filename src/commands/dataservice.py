@@ -61,7 +61,7 @@ class DataService():
                     "name": name,
                     "update_at": datetime.utcnow()
                 }
-                statusCode, updateResult = self.member.update_member(getResult[0].id, data)
+                statusCode, updateResult = self.member.update_member(getResult.id, data)
 
                 # If Error
                 if statusCode not in [204]:

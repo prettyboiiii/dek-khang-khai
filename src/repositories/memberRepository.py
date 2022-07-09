@@ -67,7 +67,7 @@ class MemberRepository:
         return log(Any), result(Any)
         '''
         try:
-            result = Member.get(id=id)
+            result: Member = Member.get(id=id)
             result.set(**data)
             commit()
             return None, result
@@ -84,7 +84,7 @@ class MemberRepository:
         return log(Any), result(Any)
         '''
         try:
-            result = Member.get(id=id)
+            result: Member = Member.get(id=id)
             result.delete()
             commit()
             return None, id
