@@ -3,6 +3,7 @@ from discord.ext.commands import AutoShardedBot
 from src.commands.dataservice import DataService
 from src.commands.general import General
 from src.commands.text2speech import Text2Speech
+from src.controllers.autoTasks import AutoTasks
 from src.events.general import General as GE
 from src.utils.configs.app_settings import get_settings
 from src.utils.helpers.logging import setup_logging
@@ -22,6 +23,7 @@ class Bot(AutoShardedBot):
         self.t2p = Text2Speech()
         self.ds = DataService()
         self.general = General()
+        self.at = AutoTasks(self)
         self.add_commands()
 
     async def on_ready(self):
@@ -32,11 +34,14 @@ class Bot(AutoShardedBot):
     def add_commands(self):
         @self.command(name="p", pass_context=True)
         async def text2speech(contex):
+            voiceClinet = await self.t2p.connect(self, contex)
             await self.t2p.play(self, contex)
-
+            await self.at.setCountdownDisconnect(voiceClinet)
+            
         @self.command(pass_context=True)
         async def connect(contex):
-            await self.t2p.connect(self, contex)
+            voiceClinet = await self.t2p.connect(self, contex)
+            await self.at.setCountdownDisconnect(voiceClinet)
         
         @self.command(pass_context=True)
         async def disconnect(contex):
