@@ -93,7 +93,7 @@ class Bot(Bot):
         @self.command(pass_context=True)
         async def hourly(contex):
             await self.ds.hourly(contex)
-            
+
         @self.command(pass_context=True)
         async def setDefaultChannel(contex):
             await self.ds.createOrUpdateDefualtChannel(contex, str(contex.message.guild.id), str(contex.message.channel.id))
