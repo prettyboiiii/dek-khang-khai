@@ -1,6 +1,8 @@
 import discord
 import logging
 
+from utils.configs.app_settings import get_settings
+
 class General():
 
     async def connect(self, client, contex) -> discord.VoiceClient:
@@ -11,7 +13,7 @@ class General():
             channel = contex.message.author.voice.channel
             # If Auhtor is not on voice channel
             if not channel:
-                await contex.send("You are not connected to a voice channel")
+                await contex.send("You are not connected to a voice channel", delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
                 return
             # Connet bot to voice channel
             voice = discord.utils.get(client.voice_clients, guild=contex.guild)
