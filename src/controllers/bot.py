@@ -1,4 +1,9 @@
 from decimal import Decimal
+from discord.ext.commands import Bot
+from src.commands.dataservice import DataService
+from src.commands.general import General
+from src.commands.text2speech import Text2Speech
+from src.events.general import General as GE
 from src.utils.configs.app_settings import get_settings
 from src.utils.helpers.logging import setup_logging
 from src.commands.text2speech import Text2Speech
@@ -17,11 +22,13 @@ class Bot(Bot):
         self.ge = GE()
         self.t2p = Text2Speech()
         self.ds = DataService()
+        self.general = General()
         self.add_commands()
 
     async def on_ready(self):
         setup_logging()
         self.ge.on_ready(self)
+        await self.general.sendMessageToDefaultChannels(self, 'เด็กข้างไข่ออนไลน์แล้วค้าบ', delete_after=True)
     
     def add_commands(self):
         @self.command(name="p", pass_context=True)
@@ -86,3 +93,7 @@ class Bot(Bot):
         @self.command(pass_context=True)
         async def hourly(contex):
             await self.ds.hourly(contex)
+            
+        @self.command(pass_context=True)
+        async def setDefaultChannel(contex):
+            await self.ds.createOrUpdateDefualtChannel(contex, str(contex.message.guild.id), str(contex.message.channel.id))

@@ -27,5 +27,13 @@ class Transaction(db.Entity):
     contributor = Optional(Member, nullable=True)
     created_at = Required(datetime, default=datetime.utcnow)
     update_at = Required(datetime, default=datetime.utcnow)
+    
+class DefaultChannel(db.Entity):
+    _table_ = "TBL_DefaultChannel"
+    id = PrimaryKey(str)
+    channel_id = Required(str, unique=True)
+    created_at = Required(datetime, default=datetime.utcnow)
+    update_at = Required(datetime, default=datetime.utcnow)
+    update_by = Optional(str, nullable=True)
 
 pony.migrate(db)
