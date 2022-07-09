@@ -1,12 +1,14 @@
-from src.services.transactionService import TransactionService
-from src.utils.configs.app_settings import get_settings
-from src.models.TransactionType import TransactionType
-from src.services.memberService import MemberService
 from datetime import datetime, timedelta
 from decimal import Decimal, getcontext
+from src.models.Entities import DefaultChannel
+from src.models.TransactionType import TransactionType
+from src.services.defaultChannelService import DefaultChannelService
+from src.services.memberService import MemberService
+from src.services.transactionService import TransactionService
+from src.utils.configs.app_settings import get_settings
+import discord
 import logging
 import random
-import discord
 
 getcontext().prec = 6
 
@@ -14,6 +16,7 @@ class DataService():
     def __init__(self) -> None:
         self.member = MemberService()
         self.transaction = TransactionService()
+        self.defaultChannel = DefaultChannelService()
 
     async def createOrUpdateMember(self, contex, dcId, name):
         '''
@@ -476,4 +479,91 @@ class DataService():
             logging.error(f'[DataService.daily] : {e}')
             await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(dcId)
                                                             , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
+            return   
+        
+    async def createOrUpdateDefualtChannel(self, contex, guildId: str, channel_id: str) -> discord.TextChannel:
+        '''
+        Create new defualt channel if not exit and update channel id
+        '''
+        try:
+            # Get defaultChannel by guildId
+            statusCode, getResult = self.defaultChannel.get_defaultChannel_by_id(guildId)
+            # If Error
+            if statusCode not in [200, 404]:
+                logging.error(f'[DataService.createOrUpdateDefualtChannel] Query defaultChannel : {getResult}')
+                await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(contex.author.id)
+                                                                    , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
+                return 
+
+            # Get id from defaultChannel
+            if statusCode != 404:
+                defaultChannel = getResult
+
+            # Insert new defaultChannel if not found
+            if statusCode == 404:
+                data = {
+                    "id": guildId,
+                    "channel_id": channel_id,
+                    "update_by": str(contex.author.id),
+                }
+                statusCode, insertResult = self.defaultChannel.insert_defaultChannel(data)
+            
+                # If Error
+                if statusCode not in [201]:
+                    logging.error(f'[DataService.createOrUpdateDefualtChannel] Insert defaultChannel : {insertResult}')
+                    await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(contex.author.id)
+                                                                    , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
+                    return 
+
+                await contex.send("<@{}> คุณได้ตั้ง <#{}> เป็น Channel หลักเรียบร้อย".format(contex.author.id, channel_id))
+                # Get id from defaultChannel
+
+            # Update channel_id
+            elif getResult.channel_id != channel_id:
+                data = {
+                    "channel_id": channel_id,
+                    "update_at": datetime.utcnow(),
+                    "update_by": str(contex.author.id),
+                }
+                statusCode, updateResult = self.defaultChannel.update_defaultChannel(getResult.id, data)
+
+                # If Error
+                if statusCode not in [204]:
+                    logging.error(f'[DataService.createOrUpdateDefualtChannel] Update defaultChannel : {updateResult}')
+                    await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(contex.author.id)
+                                                                    , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
+                    return
+
+                await contex.send("<@{}> คุณได้ตั้ง <#{}> เป็น Channel หลักเรียบร้อย".format(contex.author.id, channel_id))
+            else:
+                await contex.send("<@{}> คุณได้ตั้ง <#{}> เป็น Channel อยู่แล้ว".format(contex.author.id, channel_id))
+            
+            return await self.getDefaultChannelByGuildId(contex.guild, guildId)
+        except Exception as e:
+            logging.error(f'[DataService.createOrUpdateDefualtChannel] : {e}')
+            await contex.send("<@{}> เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง".format(contex.author.id)
+                                                            , delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
             return
+        
+    async def getDefaultChannelByGuildId(self, guild: discord.Guild, guildId: str) -> discord.TextChannel:
+        try:
+            defaultChannel = ""
+            # Get defaultChannel by guildId
+            statusCode, getResult = self.defaultChannel.get_defaultChannel_by_id(guildId)
+            # If Error
+            if statusCode not in [200, 404]:
+                logging.error(f'[DataService.createOrUpdateDefualtChannel] Query defaultChannel : {getResult}')
+                return 
+
+            # Get id from defaultChannel
+            if statusCode != 404:
+                defaultChannel = getResult
+            
+            else:
+                return guild.text_channels[0]
+            
+            return guild.get_channel(int(defaultChannel.channel_id))
+
+        except Exception as e:
+            logging.error(f'[DataService.createOrUpdateDefualtChannel] : {e}')
+            return None
