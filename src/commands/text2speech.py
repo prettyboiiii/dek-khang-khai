@@ -1,18 +1,16 @@
-import re
-from typing import List
+from gtts import gTTS
+from io import BytesIO
 from src.commands.dataservice import DataService
+from src.commands.general import General
 from src.models.TransactionType import TransactionType
-from src.services.memberService import MemberService
-from src.services.transactionService import TransactionService
-from src.utils.constants.constants import VIP_LIST, PASS_LIST, SPECIAL_WORD
 from src.providers.discord.FFmpegPCMAudio import FFmpegPCMAudio
 from src.providers.queue.queue import Queue
-from src.commands.general import General
-from io import BytesIO
-from gtts import gTTS
+from src.services.memberService import MemberService
+from src.utils.configs.app_settings import get_settings
+from src.utils.constants.constants import VIP_LIST, PASS_LIST, SPECIAL_WORD
 import discord
 import logging
-from src.utils.configs.app_settings import get_settings
+import re
 
 class Text2Speech():
     def __init__(self) -> None:

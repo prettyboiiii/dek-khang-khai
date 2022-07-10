@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from decimal import Decimal, getcontext
-from src.models.Entities import DefaultChannel
 from src.models.TransactionType import TransactionType
 from src.services.defaultChannelService import DefaultChannelService
 from src.services.memberService import MemberService

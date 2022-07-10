@@ -6,10 +6,6 @@ from src.commands.text2speech import Text2Speech
 from src.events.general import General as GE
 from src.utils.configs.app_settings import get_settings
 from src.utils.helpers.logging import setup_logging
-from src.commands.text2speech import Text2Speech
-from src.commands.dataservice import DataService
-from src.events.general import General as GE
-from discord.ext.commands import Bot
 import discord
 import logging
 
