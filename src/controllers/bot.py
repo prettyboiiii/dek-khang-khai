@@ -1,6 +1,5 @@
 from decimal import Decimal
-from discord.ext.commands import AutoShardedBot, Bot
-from sympy import prime
+from discord.ext.commands import AutoShardedBot
 from src.commands.dataservice import DataService
 from src.commands.general import General
 from src.commands.text2speech import Text2Speech
