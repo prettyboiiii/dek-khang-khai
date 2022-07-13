@@ -24,7 +24,7 @@ class Bot(Bot):
     async def on_ready(self):
         setup_logging()
         self.ge.on_ready(self)
-        await self.general.sendMessageToDefaultChannels(self, 'เด็กข้างไข่ออนไลน์แล้วค้าบ', delete_after=True)
+        # await self.general.sendMessageToDefaultChannels(self, 'เด็กข้างไข่ออนไลน์แล้วค้าบ', delete_after=True)
     
     def add_commands(self):
         @self.command(name="p", pass_context=True)
