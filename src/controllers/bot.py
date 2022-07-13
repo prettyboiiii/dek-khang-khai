@@ -1,5 +1,6 @@
 from decimal import Decimal
-from discord.ext.commands import Bot
+from discord.ext.commands import AutoShardedBot, Bot
+from sympy import prime
 from src.commands.dataservice import DataService
 from src.commands.general import General
 from src.commands.text2speech import Text2Speech
@@ -11,8 +12,11 @@ import logging
 
 intents = discord.Intents.default()
 intents.members = True
+intents.presences = True
+intents.members = True
+intents.message_content = True
 
-class Bot(Bot):
+class Bot(AutoShardedBot):
     def __init__(self) -> None:
         super().__init__(command_prefix=get_settings().PREFIX, intents=intents)
         self.ge = GE()
@@ -24,8 +28,8 @@ class Bot(Bot):
     async def on_ready(self):
         setup_logging()
         self.ge.on_ready(self)
-        # await self.general.sendMessageToDefaultChannels(self, 'เด็กข้างไข่ออนไลน์แล้วค้าบ', delete_after=True)
-    
+        await self.general.sendMessageToDefaultChannels(self, 'เด็กข้างไข่ออนไลน์แล้วค้าบ', delete_after=True)
+        
     def add_commands(self):
         @self.command(name="p", pass_context=True)
         async def text2speech(contex):
@@ -90,6 +94,6 @@ class Bot(Bot):
         async def hourly(contex):
             await self.ds.hourly(contex)
 
-        @self.command(pass_context=True)
+        @self.command(name = 'default', pass_context=True)
         async def setDefaultChannel(contex):
             await self.ds.createOrUpdateDefualtChannel(contex, str(contex.message.guild.id), str(contex.message.channel.id))

@@ -1,5 +1,6 @@
 from src.commands.dataservice import DataService
 from src.utils.configs.app_settings import get_settings
+import asyncio
 import discord
 import logging
 
@@ -42,10 +43,13 @@ class General():
             logging.error(f'[General.disconnect] : {e}')
             
     async def sendMessageToDefaultChannels(self, client: discord.Client, message: str, delete_after: bool = False):
+        fetchedchannel = []
         for guild in client.guilds:
-            default_channel = await self.ds.getDefaultChannelByGuildId(guild, str(guild.id))
-            if (delete_after):
-                await default_channel.send(message, delete_after=get_settings().SELF_MESSAGE_DELETE_TIME)
-            else:
-                await default_channel.send(message)
+            fetchedchannel.append(await self.ds.getDefaultChannelByGuildId(guild, str(guild.id)))
+        if (delete_after):
+            coroutines = [channel.send(message, delete_after=get_settings().SELF_MESSAGE_DELETE_TIME) for channel in fetchedchannel] 
+        else:
+            coroutines = [channel.send(message) for channel in fetchedchannel]
+
+        await asyncio.gather(*coroutines)
             
