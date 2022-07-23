@@ -18,6 +18,7 @@ class AppSettings(BaseSettings):
     MIN_BET: float = 0.1
     SELF_MESSAGE_DELETE_TIME: int
     PRICE: float = 0.001
+    AUTO_DISCONNECT_MINUTES: int = 30
 
     class Config:
         env_prefix = 'DKK_'
